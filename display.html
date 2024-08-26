@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Firestore Records</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .collection {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .collection h2 {
+            color: #0066cc;
+            margin-top: 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #0066cc;
+            color: #fff;
+        }
+        td {
+            background-color: #f9f9f9;
+        }
+        .no-records {
+            text-align: center;
+            color: #777;
+        }
+    </style>
+</head>
+<body>
+    <h1>Firestore Records</h1>
+    
+    <div id="bookings" class="collection">
+        <h2>Bookings</h2>
+        <div id="bookingsRecords">Loading...</div>
+    </div>
+
+    <div id="contact" class="collection">
+        <h2>Contact</h2>
+        <div id="contactRecords">Loading...</div>
+    </div>
+
+    <!-- Add Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.16.0/firebase-app.js';
+        import { getFirestore, collection, getDocs } from 'https://www.gstatic.com/firebasejs/9.16.0/firebase-firestore.js';
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCczEVOqCvfzCueQDcxFAblnq8ICuVpIKQ",
+            authDomain: "lesedi-cfa86.firebaseapp.com",
+            projectId: "lesedi-cfa86",
+            storageBucket: "lesedi-cfa86.appspot.com",
+            messagingSenderId: "860543953504",
+            appId: "1:860543953504:web:f2ce94670915048787f105"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Function to fetch and display records from a collection in a table format
+        async function fetchRecords(collectionName, elementId) {
+            const recordsDiv = document.getElementById(elementId);
+            const querySnapshot = await getDocs(collection(db, collectionName));
+
+            if (querySnapshot.empty) {
+                recordsDiv.innerHTML = '<p class="no-records">No records found.</p>';
+                return;
+            }
+
+            let html = '<table><thead><tr>';
+
+            // Create table headers from the first document
+            const firstDoc = querySnapshot.docs[0].data();
+            Object.keys(firstDoc).forEach(key => {
+                html += `<th>${key}</th>`;
+            });
+
+            html += '</tr></thead><tbody>';
+
+            // Add table rows
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                html += '<tr>';
+                Object.values(data).forEach(value => {
+                    html += `<td>${value}</td>`;
+                });
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+
+            recordsDiv.innerHTML = html;
+        }
+
+        // Fetch and display records when the page loads
+        fetchRecords('bookings', 'bookingsRecords');
+        fetchRecords('contact', 'contactRecords');
+    </script>
+</body>
+</html>
